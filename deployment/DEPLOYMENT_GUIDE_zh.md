@@ -134,7 +134,28 @@ sudo ubuntu-drivers autoinstall
 sudo reboot
 ```
 
-#### 2. Triton 编译错误
+#### 2. libstdc++ 版本兼容性错误
+
+**错误**: `version GLIBCXX_3.4.30 not found`
+```bash
+# 解决方案1: 更新conda环境中的libstdc++
+conda install -c conda-forge libstdcxx-ng=12
+
+# 解决方案2: 使用系统libstdc++
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+
+# 解决方案3: 安装兼容的GCC版本
+conda install -c conda-forge gcc_linux-64=12 gxx_linux-64=12
+
+# 解决方案4: 创建新的环境包含正确的依赖
+conda create -n vllm_fixed python=3.11
+conda activate vllm_fixed
+conda install -c conda-forge libstdcxx-ng=12 gcc_linux-64=12
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install vllm
+```
+
+#### 3. Triton 编译错误
 
 **错误**: `JSONDecodeError: Expecting value`
 ```bash

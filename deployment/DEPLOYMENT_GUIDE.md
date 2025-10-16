@@ -134,7 +134,28 @@ sudo ubuntu-drivers autoinstall
 sudo reboot
 ```
 
-#### 2. Triton Compilation Errors
+#### 2. libstdc++ Version Compatibility Error
+
+**Error**: `version GLIBCXX_3.4.30 not found`
+```bash
+# Solution 1: Update libstdc++ in conda environment
+conda install -c conda-forge libstdcxx-ng=12
+
+# Solution 2: Use system libstdc++
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+
+# Solution 3: Install compatible GCC version
+conda install -c conda-forge gcc_linux-64=12 gxx_linux-64=12
+
+# Solution 4: Create fresh environment with correct dependencies
+conda create -n vllm_fixed python=3.11
+conda activate vllm_fixed
+conda install -c conda-forge libstdcxx-ng=12 gcc_linux-64=12
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install vllm
+```
+
+#### 3. Triton Compilation Errors
 
 **Error**: `JSONDecodeError: Expecting value`
 ```bash

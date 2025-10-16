@@ -202,7 +202,19 @@ python benchmark_moe.py \
 --tp-size 2
 ```
 
-#### 2. Triton 编译错误
+#### 2. libstdc++ 兼容性错误
+```bash
+# 症状: version `GLIBCXX_3.4.30' not found
+# 快速修复:
+bash scripts/fix_libstdcxx.sh
+
+# 或手动解决:
+conda install -c conda-forge libstdcxx-ng=12
+# 或者
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+```
+
+#### 3. Triton 编译错误
 ```bash
 # 症状: JSONDecodeError, OutOfResources
 # 解决方案:

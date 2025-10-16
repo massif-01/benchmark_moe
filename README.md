@@ -188,7 +188,9 @@ python benchmark_moe.py \
 
 ### Common Issues and Solutions
 
-#### 1. Out of Memory Errors
+### Common Issues and Solutions
+
+#### 1. Memory Issues
 ```bash
 # Symptom: CUDA out of memory
 # Solutions:
@@ -202,10 +204,22 @@ python benchmark_moe.py \
 --tp-size 2
 ```
 
-#### 2. Triton Compilation Errors
+#### 2. libstdc++ Compatibility Error
+```bash
+# Symptom: version `GLIBCXX_3.4.30' not found
+# Quick fix:
+bash scripts/fix_libstdcxx.sh
+
+# Or manual solutions:
+conda install -c conda-forge libstdcxx-ng=12
+# OR
+export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+```
+
+#### 3. Triton Compilation Errors
 ```bash
 # Symptom: JSONDecodeError, OutOfResources
-# Solution:
+# Solutions:
 rm -rf ~/.triton/cache/*
 export TRITON_CACHE_DIR=/tmp/triton_cache_new
 ```
