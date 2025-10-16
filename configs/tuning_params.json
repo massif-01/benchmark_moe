@@ -1,0 +1,108 @@
+{
+  "tuning_parameters": {
+    "default": {
+      "num_iters": 100,
+      "warmup_iters": 10,
+      "seed": 42
+    },
+    "search_spaces": {
+      "reduced": {
+        "description": "减少的搜索空间，用于快速调优",
+        "block_m_range": [16, 32, 64, 128],
+        "block_n_range": [32, 64, 128],
+        "block_k_range": [64, 128],
+        "num_warps_range": [4, 8],
+        "group_m_range": [1, 16, 32],
+        "num_stage_range": [2, 3, 4]
+      },
+      "standard": {
+        "description": "标准搜索空间，平衡时间和性能",
+        "block_m_range": [16, 32, 64, 128, 256],
+        "block_n_range": [32, 64, 128, 256],
+        "block_k_range": [64, 128, 256],
+        "num_warps_range": [4, 8],
+        "group_m_range": [1, 16, 32, 64],
+        "num_stage_range": [2, 3, 4, 5]
+      },
+      "full": {
+        "description": "完整搜索空间，最佳性能但耗时较长",
+        "block_m_range": [16, 32, 64, 128, 256, 512],
+        "block_n_range": [32, 64, 128, 256, 512],
+        "block_k_range": [64, 128, 256, 512],
+        "num_warps_range": [4, 8, 16],
+        "group_m_range": [1, 8, 16, 32, 64, 128],
+        "num_stage_range": [2, 3, 4, 5, 6]
+      }
+    },
+    "quantization": {
+      "fp8_w8a8": {
+        "description": "FP8 权重和激活量化",
+        "requires_modern_gpu": true,
+        "memory_efficient": true,
+        "performance_boost": "high"
+      },
+      "int8_w8a16": {
+        "description": "INT8 权重，FP16 激活",
+        "requires_modern_gpu": false,
+        "memory_efficient": true,
+        "performance_boost": "medium"
+      },
+      "auto": {
+        "description": "自动选择数据类型",
+        "requires_modern_gpu": false,
+        "memory_efficient": false,
+        "performance_boost": "baseline"
+      }
+    },
+    "gpu_memory_thresholds": {
+      "40gb": {
+        "max_batch_size": 1024,
+        "recommended_tp": 2,
+        "suggested_models": ["mixtral_8x7b", "qwen2_moe_57b", "glm4_moe"]
+      },
+      "80gb": {
+        "max_batch_size": 2048,
+        "recommended_tp": 4,
+        "suggested_models": ["mixtral_8x22b", "deepseek_v2", "qwen3_moe", "jamba", "dbrx"]
+      },
+      "160gb": {
+        "max_batch_size": 4096,
+        "recommended_tp": 8,
+        "suggested_models": ["deepseek_v3"]
+      }
+    },
+    "optimization_targets": {
+      "latency": {
+        "description": "优化推理延迟",
+        "preferred_batch_sizes": [1, 2, 4, 8, 16],
+        "tuning_focus": "small_batch_performance"
+      },
+      "throughput": {
+        "description": "优化吞吐量",
+        "preferred_batch_sizes": [256, 512, 1024, 2048, 4096],
+        "tuning_focus": "large_batch_performance"
+      },
+      "balanced": {
+        "description": "平衡延迟和吞吐量",
+        "preferred_batch_sizes": [16, 32, 64, 128, 256, 512],
+        "tuning_focus": "mixed_batch_performance"
+      }
+    }
+  },
+  "environment_configs": {
+    "single_gpu": {
+      "ray_config": {
+        "num_gpus": 1,
+        "resources_per_trial": {"gpu": 1}
+      },
+      "parallel_tuning": false
+    },
+    "multi_gpu": {
+      "ray_config": {
+        "num_gpus": "auto",
+        "resources_per_trial": {"gpu": 1}
+      },
+      "parallel_tuning": true
+    }
+  }
+}

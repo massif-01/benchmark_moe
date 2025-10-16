@@ -1,0 +1,129 @@
+{
+  "models": {
+    "mixtral_8x7b": {
+      "model_name": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+      "architecture": "MixtralForCausalLM",
+      "num_experts": 8,
+      "topk": 2,
+      "hidden_size": 4096,
+      "intermediate_size": 14336,
+      "recommended_tp_sizes": [1, 2, 4, 8],
+      "min_memory_gb": 45,
+      "supported_dtypes": ["auto", "fp8_w8a8", "int8_w8a16"]
+    },
+    "mixtral_8x22b": {
+      "model_name": "mistralai/Mixtral-8x22B-Instruct-v0.1",
+      "architecture": "MixtralForCausalLM", 
+      "num_experts": 8,
+      "topk": 2,
+      "hidden_size": 6144,
+      "intermediate_size": 16384,
+      "recommended_tp_sizes": [4, 8],
+      "min_memory_gb": 90,
+      "supported_dtypes": ["auto", "fp8_w8a8", "int8_w8a16"]
+    },
+    "deepseek_v2": {
+      "model_name": "deepseek-ai/DeepSeek-V2-Chat",
+      "architecture": "DeepseekV2ForCausalLM",
+      "num_experts": 160,
+      "topk": 6,
+      "hidden_size": 5120,
+      "intermediate_size": 12288,
+      "recommended_tp_sizes": [4, 8],
+      "min_memory_gb": 80,
+      "supported_dtypes": ["auto", "fp8_w8a8", "int8_w8a16"]
+    },
+    "deepseek_v3": {
+      "model_name": "deepseek-ai/DeepSeek-V3-Base",
+      "architecture": "DeepseekV3ForCausalLM",
+      "num_experts": 256,
+      "topk": 8,
+      "hidden_size": 7168,
+      "intermediate_size": 18432,
+      "recommended_tp_sizes": [8, 16],
+      "min_memory_gb": 120,
+      "supported_dtypes": ["auto", "fp8_w8a8", "int8_w8a16"]
+    },
+    "qwen2_moe_57b": {
+      "model_name": "Qwen/Qwen2.5-MoE-A2.7B-Instruct",
+      "architecture": "Qwen2MoeForCausalLM",
+      "num_experts": 64,
+      "topk": 4,
+      "hidden_size": 2048,
+      "intermediate_size": 5504,
+      "recommended_tp_sizes": [1, 2, 4],
+      "min_memory_gb": 20,
+      "supported_dtypes": ["auto", "fp8_w8a8", "int8_w8a16"]
+    },
+    "qwen3_moe": {
+      "model_name": "Qwen/Qwen3-MoE-A4.8B-Instruct",
+      "architecture": "Qwen3MoeForCausalLM",
+      "num_experts": 32,
+      "topk": 4,
+      "hidden_size": 3584,
+      "intermediate_size": 18944,
+      "recommended_tp_sizes": [2, 4, 8],
+      "min_memory_gb": 40,
+      "supported_dtypes": ["auto", "fp8_w8a8", "int8_w8a16"]
+    },
+    "jamba": {
+      "model_name": "ai21labs/AI21-Jamba-1.5-Large",
+      "architecture": "JambaForCausalLM",
+      "num_experts": 16,
+      "topk": 2,
+      "hidden_size": 4096,
+      "intermediate_size": 14336,
+      "recommended_tp_sizes": [2, 4, 8],
+      "min_memory_gb": 50,
+      "supported_dtypes": ["auto", "fp8_w8a8", "int8_w8a16"]
+    },
+    "dbrx": {
+      "model_name": "databricks/dbrx-instruct",
+      "architecture": "DbrxForCausalLM",
+      "num_experts": 16,
+      "topk": 4,
+      "hidden_size": 6144,
+      "intermediate_size": 10752,
+      "recommended_tp_sizes": [4, 8],
+      "min_memory_gb": 70,
+      "supported_dtypes": ["auto", "fp8_w8a8", "int8_w8a16"]
+    },
+    "glm4_moe": {
+      "model_name": "THUDM/glm-4-9b-chat",
+      "architecture": "Glm4MoeForCausalLM",
+      "num_experts": 64,
+      "topk": 2,
+      "hidden_size": 4096,
+      "intermediate_size": 13696,
+      "recommended_tp_sizes": [2, 4],
+      "min_memory_gb": 35,
+      "supported_dtypes": ["auto", "fp8_w8a8", "int8_w8a16"]
+    }
+  },
+  "batch_sizes": {
+    "small": [1, 2, 4, 8, 16, 32],
+    "medium": [64, 128, 256, 512],
+    "large": [1024, 1536, 2048, 3072, 4096],
+    "all": [1, 2, 4, 8, 16, 24, 32, 48, 64, 96, 128, 256, 512, 1024, 1536, 2048, 3072, 4096]
+  },
+  "tuning_scenarios": {
+    "quick": {
+      "description": "快速调优，适合初步测试",
+      "batch_sizes": "small",
+      "iterations": 20,
+      "search_space": "reduced"
+    },
+    "standard": {
+      "description": "标准调优，平衡时间和精度",
+      "batch_sizes": "medium",
+      "iterations": 50,
+      "search_space": "standard"
+    },
+    "comprehensive": {
+      "description": "全面调优，获得最佳性能",
+      "batch_sizes": "all",
+      "iterations": 100,
+      "search_space": "full"
+    }
+  }
+}
