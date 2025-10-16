@@ -1,0 +1,12 @@
+{
+  "name": "qwen3_30b_comprehensive",
+  "model": "/home/rm01/models/dev/llm/Qwen3-30B-A3B-Instruct-2507-AWQ",
+  "tp_size": 1,
+  "dtype": "auto",
+  "batch_sizes": [1, 2, 4, 8, 16, 32, 64, 128],
+  "save_dir": "./results/tuned_configs/qwen3_30b_comprehensive",
+  "priority": 1,
+  "estimated_time_hours": 3.2,
+  "description": "Qwen3-30B全面优化，测试所有常用批次大小以获得最佳性能",
+  "additional_args": ["--trust-remote-code", "--use-deep-gemm"]
+}

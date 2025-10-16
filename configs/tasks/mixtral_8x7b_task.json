@@ -1,0 +1,12 @@
+{
+  "name": "mixtral_8x7b_optimization",
+  "model": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+  "tp_size": 1,
+  "dtype": "fp8_w8a8",
+  "batch_sizes": [1, 2, 4, 8, 16, 32],
+  "save_dir": "./results/tuned_configs/mixtral_8x7b",
+  "priority": 2,
+  "estimated_time_hours": 1.8,
+  "description": "Mixtral-8x7B模型优化，使用FP8量化减少显存占用",
+  "additional_args": ["--trust-remote-code"]
+}

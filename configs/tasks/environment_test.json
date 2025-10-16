@@ -1,0 +1,12 @@
+{
+  "name": "environment_test",
+  "model": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+  "tp_size": 1,
+  "dtype": "fp8_w8a8",
+  "batch_sizes": [1, 2],
+  "save_dir": "./results/tuned_configs/env_test",
+  "priority": 0,
+  "estimated_time_hours": 0.2,
+  "description": "环境测试任务，快速验证系统配置是否正确",
+  "additional_args": ["--trust-remote-code"]
+}

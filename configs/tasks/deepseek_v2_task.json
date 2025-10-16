@@ -1,0 +1,12 @@
+{
+  "name": "deepseek_v2_quick_test",
+  "model": "deepseek-ai/DeepSeek-V2-Chat",
+  "tp_size": 1,
+  "dtype": "fp8_w8a8",
+  "batch_sizes": [1, 4, 16],
+  "save_dir": "./results/tuned_configs/deepseek_v2",
+  "priority": 3,
+  "estimated_time_hours": 0.8,
+  "description": "DeepSeek-V2快速测试，仅测试关键批次大小",
+  "additional_args": ["--trust-remote-code", "--enable-expert-parallel"]
+}
