@@ -1,45 +1,47 @@
 # benchmark_moe
 
-基于 vLLM 的 MoE (Mixture of Experts) 模型内核性能优化工具
+[🇨🇳 中文](README_zh.md) | [🇺🇸 English](README.md)
+
+A high-performance optimization tool for vLLM MoE (Mixture of Experts) model kernel tuning
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![vLLM](https://img.shields.io/badge/vLLM-0.10.0+-green.svg)](https://github.com/vllm-project/vllm)
 
-一个专门用于优化 vLLM 框架中 MoE 模型推理性能的工具集，通过自动化调优 Triton 内核参数，为不同的模型架构和硬件配置找到最优的执行配置。
+A specialized toolkit for optimizing MoE model inference performance in the vLLM framework through automated Triton kernel parameter tuning, finding optimal execution configurations for different model architectures and hardware setups.
 
-## 🎯 主要功能
+## 🎯 Key Features
 
-- **🔧 自动化内核调优**: 使用 Ray 分布式框架自动搜索最优的 Triton 内核配置
-- **📊 多模型支持**: 支持 Mixtral、DeepSeek、Qwen、Jamba 等主流 MoE 模型
-- **⚡ 性能优化**: 针对不同批次大小和硬件配置进行专门优化
-- **🛠️ 故障诊断**: 提供完善的环境检查和问题排查工具
-- **📈 结果分析**: 生成详细的性能报告和配置推荐
+- **🔧 Automated Kernel Tuning**: Use Ray distributed framework to automatically search for optimal Triton kernel configurations
+- **📊 Multi-Model Support**: Support mainstream MoE models including Mixtral, DeepSeek, Qwen, Jamba, etc.
+- **⚡ Performance Optimization**: Specialized optimization for different batch sizes and hardware configurations
+- **🛠️ Fault Diagnosis**: Complete environment checking and troubleshooting tools
+- **📈 Result Analysis**: Generate detailed performance reports and configuration recommendations
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 前置要求
+### Prerequisites
 
-- **硬件**: NVIDIA GPU (推荐 A100/H100)
-- **软件**: Ubuntu 18.04+, Python 3.11+, CUDA 11.8+
-- **依赖**: vLLM 0.10.0+, PyTorch 2.0+, Ray
+- **Hardware**: NVIDIA GPU (recommended A100/H100)
+- **Software**: Ubuntu 18.04+, Python 3.11+, CUDA 11.8+
+- **Dependencies**: vLLM 0.10.0+, PyTorch 2.0+, Ray
 
-### 安装步骤
+### Installation
 
-1. **克隆项目**
+1. **Clone the project**
    ```bash
-   git clone https://github.com/your_username/benchmark_moe.git
+   git clone https://github.com/massif-01/benchmark_moe.git
    cd benchmark_moe
    ```
 
-2. **环境检查**
+2. **Environment check**
    ```bash
    bash scripts/server_check.sh
    ```
 
-3. **运行单个模型调优**
+3. **Run single model tuning**
    ```bash
-   # 基本调优 - Qwen3 模型
+   # Basic tuning - Qwen3 model
    python benchmark_moe.py \
      --model /path/to/your/qwen3-model \
      --tp-size 1 \
@@ -50,107 +52,107 @@
      --trust-remote-code
    ```
 
-4. **查看结果**
+4. **View results**
    ```bash
    ls ./optimized_configs/
-   # 输出: E64N9472_tp1_fp16.json (示例配置文件)
+   # Output: E64N9472_tp1_fp16.json (example config file)
    ```
 
-## 📋 详细使用指南
+## 📋 Detailed Usage Guide
 
-### 环境准备
+### Environment Setup
 
-#### 检查系统环境
+#### System Environment Check
 ```bash
-# 运行环境检查脚本
+# Run environment check script
 bash scripts/server_check.sh
 
-# 检查 GPU 状态
+# Check GPU status
 nvidia-smi
 
-# 检查 Python 依赖
-python -c "import vllm, ray, torch, triton; print('环境检查通过')"
+# Check Python dependencies
+python -c "import vllm, ray, torch, triton; print('Environment check passed')"
 ```
 
-#### 处理常见环境问题
+#### Common Environment Issues
 
-**问题 1: Triton 缓存损坏**
+**Issue 1: Triton Cache Corruption**
 ```bash
-# 清理 Triton 缓存（如果遇到 JSONDecodeError）
+# Clear Triton cache (if encountering JSONDecodeError)
 rm -rf ~/.triton/cache/*
 
-# 或设置新的缓存目录
+# Or set new cache directory
 export TRITON_CACHE_DIR=/tmp/triton_cache_$(date +%s)
 mkdir -p $TRITON_CACHE_DIR
 ```
 
-**问题 2: libstdc++ 版本问题**
+**Issue 2: libstdc++ Version Issues**
 ```bash
-# 更新 conda 环境中的 libstdc++
+# Update libstdc++ in conda environment
 conda install -c conda-forge libstdcxx-ng
 
-# 或使用系统库
+# Or use system library
 export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
 ```
 
-**问题 3: Ray 警告**
+**Issue 3: Ray Warnings**
 ```bash
-# 消除 Ray 相关警告
+# Suppress Ray-related warnings
 export RAY_ACCEL_ENV_VAR_OVERRIDE_ON_ZERO=0
 export RAY_DISABLE_IMPORT_WARNING=1
 ```
 
-### 调优参数说明
+### Tuning Parameters
 
-#### 基本参数
-- `--model`: 模型路径或 HuggingFace 模型名
-- `--tp-size`: 张量并行度（根据 GPU 数量设置）
-- `--dtype`: 数据类型 (`auto`, `fp8_w8a8`, `int8_w8a16`)
-- `--batch-size`: 要测试的批次大小列表
-- `--tune`: 启用调优模式
-- `--save-dir`: 配置文件保存目录
+#### Basic Parameters
+- `--model`: Model path or HuggingFace model name
+- `--tp-size`: Tensor parallelism degree (set according to GPU count)
+- `--dtype`: Data type (`auto`, `fp8_w8a8`, `int8_w8a16`)
+- `--batch-size`: List of batch sizes to test
+- `--tune`: Enable tuning mode
+- `--save-dir`: Configuration file save directory
 
-#### 高级参数
-- `--use-deep-gemm`: 启用 DeepGEMM 优化
-- `--enable-expert-parallel`: 启用专家并行（适用于大型模型）
-- `--seed`: 随机种子（保证结果可重现）
+#### Advanced Parameters
+- `--use-deep-gemm`: Enable DeepGEMM optimization
+- `--enable-expert-parallel`: Enable expert parallelism (for large models)
+- `--seed`: Random seed (ensures reproducible results)
 
-### 支持的模型类型
+### Supported Model Types
 
-| 模型系列 | 专家数 | Top-K | 推荐显存 | 示例命令 |
-|---------|--------|-------|----------|----------|
+| Model Series | Experts | Top-K | Recommended VRAM | Example Command |
+|-------------|---------|-------|------------------|-----------------|
 | **Qwen3-30B-A3B** | 64 | 4 | 64GB+ | `--model path/to/qwen3 --tp-size 1` |
 | **Mixtral-8x7B** | 8 | 2 | 45GB+ | `--model mistralai/Mixtral-8x7B-Instruct-v0.1 --tp-size 2` |
 | **DeepSeek-V2** | 160 | 6 | 80GB+ | `--model deepseek-ai/DeepSeek-V2-Chat --tp-size 4` |
 | **DeepSeek-V3** | 256 | 8 | 120GB+ | `--model deepseek-ai/DeepSeek-V3-Base --tp-size 8` |
 
-### 批量调优脚本
+### Batch Tuning Scripts
 
-#### 使用配置管理工具
+#### Using Configuration Management Tool
 ```bash
-# 列出支持的模型
+# List supported models
 python tools/config_manager.py list
 
-# 为特定模型调优
+# Tune specific model
 python tools/config_manager.py tune qwen3_30b
 
-# 查看配置推荐
+# View configuration recommendations
 python tools/config_manager.py recommend qwen3_30b
 ```
 
-#### 安全的批量调优
+#### Safe Batch Tuning
 ```bash
-# 使用安全脚本逐个测试批次大小
+# Use safe script to test batch sizes one by one
 bash scripts/run_benchmark_safe.sh
 ```
 
-## 📊 结果解读
+## 📊 Result Interpretation
 
-### 配置文件格式
+### Configuration File Format
 ```json
 {
   "triton_version": "2.1.0",
-  "1": {                    // batch_size=1 的最优配置
+  "1": {                    // Optimal config for batch_size=1
     "BLOCK_SIZE_M": 16,
     "BLOCK_SIZE_N": 64, 
     "BLOCK_SIZE_K": 128,
@@ -158,7 +160,7 @@ bash scripts/run_benchmark_safe.sh
     "num_warps": 4,
     "num_stages": 3
   },
-  "64": {                   // batch_size=64 的最优配置
+  "64": {                   // Optimal config for batch_size=64
     "BLOCK_SIZE_M": 128,
     "BLOCK_SIZE_N": 128,
     "BLOCK_SIZE_K": 256,
@@ -169,151 +171,153 @@ bash scripts/run_benchmark_safe.sh
 }
 ```
 
-### 性能分析
+### Performance Analysis
 ```bash
-# 运行性能基准测试（不加 --tune）
+# Run performance benchmark (without --tune)
 python benchmark_moe.py \
   --model your_model \
   --tp-size 1 \
   --batch-size 1 2 4 8 16 32 64 128
 
-# 输出示例:
+# Example output:
 # Batch size: 1, Kernel time: 45.23 us
 # Batch size: 64, Kernel time: 892.15 us
 ```
 
-## 🛠️ 故障排除
+## 🛠️ Troubleshooting
 
-### 常见问题及解决方案
+### Common Issues and Solutions
 
-#### 1. 内存不足错误
+#### 1. Out of Memory Errors
 ```bash
-# 症状: CUDA out of memory
-# 解决方案:
-# - 减少批次大小
+# Symptom: CUDA out of memory
+# Solutions:
+# - Reduce batch size
 --batch-size 1 2 4 8 16 32
 
-# - 使用量化
+# - Use quantization
 --dtype fp8_w8a8
 
-# - 增加张量并行度（如果有多GPU）
+# - Increase tensor parallelism (if multi-GPU)
 --tp-size 2
 ```
 
-#### 2. Triton 编译错误
+#### 2. Triton Compilation Errors
 ```bash
-# 症状: JSONDecodeError, OutOfResources
-# 解决方案:
+# Symptom: JSONDecodeError, OutOfResources
+# Solution:
 rm -rf ~/.triton/cache/*
 export TRITON_CACHE_DIR=/tmp/triton_cache_new
 ```
 
-#### 3. 模型加载失败
+#### 3. Model Loading Failures
 ```bash
-# 症状: Model not found, Permission denied
-# 解决方案:
-# - 检查模型路径
+# Symptom: Model not found, Permission denied
+# Solutions:
+# - Check model path
 ls /path/to/your/model
 
-# - 添加访问权限
+# - Add access permissions
 --trust-remote-code
 
-# - 预下载模型
+# - Pre-download model
 huggingface-cli download model_name --local-dir ./models/
 ```
 
-#### 4. Ray 初始化问题
+#### 4. Ray Initialization Issues
 ```bash
-# 症状: Ray 无法启动
-# 解决方案:
+# Symptom: Ray cannot start
+# Solution:
 export RAY_DISABLE_IMPORT_WARNING=1
-ray stop  # 停止现有实例
-ray start --head  # 重新启动
+ray stop  # Stop existing instance
+ray start --head  # Restart
 ```
 
-### 性能调优建议
+### Performance Tuning Recommendations
 
-#### 针对不同使用场景
+#### For Different Use Cases
 
-**低延迟场景（在线推理）**
+**Low Latency Scenarios (Online Inference)**
 ```bash
-# 优化小批次性能
+# Optimize small batch performance
 --batch-size 1 2 4 8 16
---dtype fp8_w8a8  # 减少内存访问延迟
+--dtype fp8_w8a8  # Reduce memory access latency
 ```
 
-**高吞吐场景（批量处理）**
+**High Throughput Scenarios (Batch Processing)**
 ```bash
-# 优化大批次性能  
+# Optimize large batch performance  
 --batch-size 64 128 256 512 1024
---dtype auto  # 平衡精度和性能
+--dtype auto  # Balance precision and performance
 ```
 
-**内存受限场景**
+**Memory-Constrained Scenarios**
 ```bash
-# 最大化内存利用率
+# Maximize memory utilization
 --dtype fp8_w8a8
 --use-deep-gemm
 --enable-expert-parallel
 ```
 
+## 📁 Project Structure
+
 ```
 benchmark_moe/
-├── README.md                   # 项目说明文档
-├── benchmark_moe.py           # vLLM MoE 基准测试核心脚本
-├── scripts/                   # 运行脚本目录
-│   ├── server_check.sh        # 服务器环境检查脚本
-│   ├── tune_mixtral.sh        # Mixtral 模型调优脚本
-│   ├── tune_deepseek.sh       # DeepSeek 模型调优脚本
-│   └── run_benchmark_safe.sh  # 安全的批量调优脚本
-├── configs/                   # 配置文件目录
-│   ├── models.json            # 支持的模型配置
-│   └── tuning_params.json     # 调优参数配置
-├── tools/                     # 分析工具目录
-│   └── config_manager.py      # 配置管理工具
-├── results/                   # 结果输出目录
-│   ├── tuned_configs/         # 调优后的配置文件
-│   └── performance_reports/   # 性能测试报告
-└── deployment/                # 部署相关文件
-    ├── requirements.txt       # Python依赖列表
-    └── DEPLOYMENT_GUIDE.md    # 详细部署指南
+├── README.md                   # English documentation
+├── README_zh.md               # Chinese documentation  
+├── LICENSE                     # Apache-2.0 license
+├── .gitignore                  # Git ignore rules
+├── benchmark_moe.py           # vLLM MoE benchmark core script
+├── scripts/                   # Script directory
+│   ├── server_check.sh        # Server environment check script
+│   ├── tune_mixtral.sh        # Mixtral model tuning script
+│   ├── tune_deepseek.sh       # DeepSeek model tuning script
+│   └── run_benchmark_safe.sh  # Safe batch tuning script
+├── configs/                   # Configuration directory
+│   ├── models.json            # Supported model configurations
+│   └── tuning_params.json     # Tuning parameter configurations
+├── tools/                     # Analysis tools directory
+│   └── config_manager.py      # Configuration management tool
+└── deployment/                # Deployment related files
+    ├── requirements.txt       # Python dependencies list
+    └── DEPLOYMENT_GUIDE.md    # Detailed deployment guide
 ```
 
-## 🤝 贡献指南
+## 🤝 Contributing
 
-欢迎提交 Issue 和 Pull Request！
+Contributions are welcome! Please feel free to submit Issues and Pull Requests.
 
-### 开发环境设置
+### Development Environment Setup
 ```bash
-git clone https://github.com/your_username/benchmark_moe.git
+git clone https://github.com/massif-01/benchmark_moe.git
 cd benchmark_moe
 pip install -r deployment/requirements.txt
 ```
 
-### 提交代码
-1. Fork 这个项目
-2. 创建您的特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交您的改动 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启一个 Pull Request
+### Contributing Code
+1. Fork this project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📄 许可证
+## 📄 License
 
-此项目采用 Apache-2.0 许可证。详情请见 [LICENSE](LICENSE) 文件。
+This project is licensed under the Apache-2.0 License. See the [LICENSE](LICENSE) file for details.
 
-## � 致谢
+## 🙏 Acknowledgments
 
-- [vLLM](https://github.com/vllm-project/vllm) - 高性能 LLM 推理引擎
-- [Ray](https://github.com/ray-project/ray) - 分布式计算框架
-- [Triton](https://github.com/openai/triton) - GPU 编程语言
+- [vLLM](https://github.com/vllm-project/vllm) - High-performance LLM inference engine
+- [Ray](https://github.com/ray-project/ray) - Distributed computing framework
+- [Triton](https://github.com/openai/triton) - GPU programming language
 
-## 📮 联系方式
+## 📮 Contact
 
-如有问题或建议，请通过以下方式联系：
+For questions or suggestions, please contact us via:
 
-- 提交 [GitHub Issue](https://github.com/your_username/benchmark_moe/issues)
-- 发起 [Discussion](https://github.com/your_username/benchmark_moe/discussions)
+- Submit [GitHub Issue](https://github.com/massif-01/benchmark_moe/issues)
+- Start a [Discussion](https://github.com/massif-01/benchmark_moe/discussions)
 
 ---
 
-**⭐ 如果这个项目对您有帮助，请给我们一个 Star！**
+**⭐ If this project helps you, please give us a Star!**
