@@ -18,13 +18,46 @@
 - **🛠️ 故障诊断**: 提供完善的环境检查和问题排查工具
 - **📈 结果分析**: 生成详细的性能报告和配置推荐
 
+## 🆕 版本兼容性
+
+### benchmark_moe_fixed.py - 增强兼容性版本
+
+为了解决用户在不同 vLLM 版本中遇到的兼容性问题，我们提供了 `benchmark_moe_fixed.py` - 一个完全兼容的版本，解决了不同 vLLM 版本间的常见 API 不兼容问题。
+
+**主要改进:**
+- ✅ **多级导入回退机制** 解决 `_get_config_dtype_str` 函数导入问题
+- ✅ **动态参数兼容性** 适配 `FusedMoEQuantConfig.make()` 方法
+- ✅ **自动函数签名检测** 兼容 `fused_experts()` 函数变化
+- ✅ **纯英文输出** (移除表情符号和中文文本)
+- ✅ **生产级日志** 和错误处理
+
+**使用方法:**
+```bash
+# 使用修复版本替代 benchmark_moe.py
+python benchmark_moe_fixed.py \
+  --model /path/to/your/model \
+  --tp-size 1 \
+  --dtype auto \
+  --batch-size 1 2 4 8 \
+  --tune \
+  --save-dir ./optimized_configs \
+  --trust-remote-code
+```
+
+**何时使用 benchmark_moe_fixed.py:**
+- 遇到 `ImportError: cannot import name '_get_config_dtype_str'` 错误
+- 出现 `TypeError: FusedMoEQuantConfig.make() got an unexpected keyword argument` 错误  
+- 遇到 `TypeError: fused_experts() got an unexpected keyword argument 'quant_config'` 错误
+- 使用不同的 vLLM 版本 (0.6.0 - 0.10.0+)
+- 需要纯英文输出的生产环境
+
 ## 🚀 快速开始
 
 ### 前置要求
 
 - **硬件**: NVIDIA GPU (推荐 A100/H100)
 - **软件**: Ubuntu 18.04+, Python 3.11+, CUDA 11.8+
-- **依赖**: vLLM 0.10.0+, PyTorch 2.0+, Ray
+- **依赖**: vLLM 0.6.0+, PyTorch 2.0+, Ray
 
 ### 安装步骤
 

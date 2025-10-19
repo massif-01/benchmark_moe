@@ -18,13 +18,46 @@ A specialized toolkit for optimizing MoE model inference performance in the vLLM
 - **🛠️ Fault Diagnosis**: Complete environment checking and troubleshooting tools
 - **📈 Result Analysis**: Generate detailed performance reports and configuration recommendations
 
+## 🆕 Version Compatibility
+
+### benchmark_moe_fixed.py - Enhanced Compatibility Version
+
+For users experiencing vLLM version compatibility issues, we provide `benchmark_moe_fixed.py` - a fully compatible version that resolves common API incompatibilities across different vLLM versions.
+
+**Key Improvements:**
+- ✅ **Multi-level import fallback** for `_get_config_dtype_str` function
+- ✅ **Dynamic parameter compatibility** for `FusedMoEQuantConfig.make()`
+- ✅ **Automatic function signature detection** for `fused_experts()`
+- ✅ **Clean English output** (removes emoji and Chinese text)
+- ✅ **Production-ready logging** and error handling
+
+**Usage:**
+```bash
+# Use the fixed version instead of benchmark_moe.py
+python benchmark_moe_fixed.py \
+  --model /path/to/your/model \
+  --tp-size 1 \
+  --dtype auto \
+  --batch-size 1 2 4 8 \
+  --tune \
+  --save-dir ./optimized_configs \
+  --trust-remote-code
+```
+
+**When to use benchmark_moe_fixed.py:**
+- Encountering `ImportError: cannot import name '_get_config_dtype_str'`
+- Getting `TypeError: FusedMoEQuantConfig.make() got an unexpected keyword argument`
+- Facing `TypeError: fused_experts() got an unexpected keyword argument 'quant_config'`
+- Running different vLLM versions (0.6.0 - 0.10.0+)
+- Need clean English output for production environments
+
 ## 🚀 Quick Start
 
 ### Prerequisites
 
 - **Hardware**: NVIDIA GPU (recommended A100/H100)
 - **Software**: Ubuntu 18.04+, Python 3.11+, CUDA 11.8+
-- **Dependencies**: vLLM 0.10.0+, PyTorch 2.0+, Ray
+- **Dependencies**: vLLM 0.6.0+, PyTorch 2.0+, Ray
 
 ### Installation
 
