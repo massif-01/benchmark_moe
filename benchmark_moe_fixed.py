@@ -697,6 +697,75 @@ def get_weight_block_size_safety(config, default_value=None):
     return default_value
 
 
+def extract_moe_config(config):
+    """Extract MoE configuration parameters from various model configs."""
+    # Try to get text config if available
+    if hasattr(config, 'get_text_config'):
+        try:
+            text_config = config.get_text_config()
+            if text_config is not None:
+                config = text_config
+        except:
+            pass
+    
+    # Architecture-specific parsing
+    architectures = getattr(config, 'architectures', None)
+    arch = 'Unknown'
+    if architectures and len(architectures) > 0:
+        arch = architectures[0]
+    
+    if arch == "DbrxForCausalLM":
+        ffn_config = getattr(config, 'ffn_config', None)
+        if ffn_config:
+            return (
+                getattr(ffn_config, 'moe_num_experts', None),
+                getattr(ffn_config, 'moe_top_k', None),
+                getattr(ffn_config, 'ffn_hidden_size', None),
+                getattr(config, 'hidden_size', None)
+            )
+    
+    # Generic MoE parameter extraction with multiple fallbacks
+    def try_get_attr(obj, names, default=None):
+        for name in names:
+            if hasattr(obj, name):
+                val = getattr(obj, name)
+                if val is not None:
+                    return val
+        return default
+    
+    # Number of experts
+    E = try_get_attr(config, [
+        'n_routed_experts', 'num_experts', 'num_local_experts', 
+        'moe_num_experts', 'num_experts_per_layer'
+    ])
+    
+    # Top-K experts
+    topk = try_get_attr(config, [
+        'num_experts_per_tok', 'moe_top_k', 'top_k', 'moe_topk'
+    ])
+    
+    # Handle topk as list (some models store it as [k] format)
+    if isinstance(topk, list) and len(topk) > 0:
+        topk = topk[0]
+    
+    # Intermediate size
+    intermediate_size = try_get_attr(config, [
+        'moe_intermediate_size', 'intermediate_size', 'ffn_hidden_size',
+        'feedforward_size', 'mlp_hidden_size'
+    ])
+    
+    # Handle intermediate_size as list (some models store it as [size] format)
+    if isinstance(intermediate_size, list) and len(intermediate_size) > 0:
+        intermediate_size = intermediate_size[0]
+    
+    # Hidden size
+    hidden_size = try_get_attr(config, [
+        'hidden_size', 'd_model', 'model_dim'
+    ])
+    
+    return E, topk, intermediate_size, hidden_size
+
+
 def main(args: argparse.Namespace):
     print("vLLM MoE Benchmark - Compatibility Fixed Version")
     print(f"Arguments: {args}")
@@ -706,54 +775,24 @@ def main(args: argparse.Namespace):
     if args.model_prefix:
         config = getattr(config, args.model_prefix)
 
-    if config.architectures[0] == "DbrxForCausalLM":
-        E = config.ffn_config.moe_num_experts
-        topk = config.ffn_config.moe_top_k
-        intermediate_size = config.ffn_config.ffn_hidden_size
-        hidden_size = config.hidden_size
-    elif config.architectures[0] == "JambaForCausalLM":
-        E = config.num_experts
-        topk = config.num_experts_per_tok
-        intermediate_size = config.intermediate_size
-        hidden_size = config.hidden_size
-    elif config.architectures[0] in (
-        "DeepseekV2ForCausalLM",
-        "DeepseekV3ForCausalLM",
-        "DeepseekV32ForCausalLM",
-        "Glm4MoeForCausalLM",
-    ):
-        E = config.n_routed_experts
-        topk = config.num_experts_per_tok
-        intermediate_size = config.moe_intermediate_size
-        hidden_size = config.hidden_size
-    elif config.architectures[0] in (
-        "Qwen2MoeForCausalLM",
-        "Qwen3MoeForCausalLM",
-        "Qwen3NextForCausalLM",
-    ):
-        E = config.num_experts
-        topk = config.num_experts_per_tok
-        intermediate_size = config.moe_intermediate_size
-        hidden_size = config.hidden_size
-    elif config.architectures[0] == "Qwen3VLMoeForConditionalGeneration":
-        text_config = config.get_text_config()
-        E = text_config.num_experts
-        topk = text_config.num_experts_per_tok
-        intermediate_size = text_config.moe_intermediate_size
-        hidden_size = text_config.hidden_size
-    elif config.architectures[0] in ("HunYuanMoEV1ForCausalLM"):
-        E = config.num_experts
-        topk = config.moe_topk[0]
-        intermediate_size = config.moe_intermediate_size[0]
-        hidden_size = config.hidden_size
-    else:
-        # Support for llama4
-        config = config.get_text_config()
-        # Default: Mixtral.
-        E = config.num_local_experts
-        topk = config.num_experts_per_tok
-        intermediate_size = config.intermediate_size
-        hidden_size = config.hidden_size
+    # Extract MoE configuration using universal parser
+    E, topk, intermediate_size, hidden_size = extract_moe_config(config)
+    
+    # Validate extracted parameters
+    if E is None:
+        print(f"DEBUG: Available config attributes: {[attr for attr in dir(config) if not attr.startswith('_')]}")
+        raise ValueError(f"Could not extract number of experts from model config. Architecture: {getattr(config, 'architectures', 'Unknown')}")
+    if topk is None:
+        print(f"DEBUG: Available config attributes: {[attr for attr in dir(config) if not attr.startswith('_')]}")
+        raise ValueError(f"Could not extract top-k value from model config. Architecture: {getattr(config, 'architectures', 'Unknown')}")
+    if intermediate_size is None:
+        print(f"DEBUG: Available config attributes: {[attr for attr in dir(config) if not attr.startswith('_')]}")
+        raise ValueError(f"Could not extract intermediate size from model config. Architecture: {getattr(config, 'architectures', 'Unknown')}")
+    if hidden_size is None:
+        print(f"DEBUG: Available config attributes: {[attr for attr in dir(config) if not attr.startswith('_')]}")
+        raise ValueError(f"Could not extract hidden size from model config. Architecture: {getattr(config, 'architectures', 'Unknown')}")
+    
+    print(f"Extracted MoE config: E={E}, topk={topk}, intermediate_size={intermediate_size}, hidden_size={hidden_size}")
     
     enable_ep = bool(args.enable_expert_parallel)
     if enable_ep:
